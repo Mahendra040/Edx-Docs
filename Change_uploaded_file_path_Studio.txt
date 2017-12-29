@@ -1,0 +1,73 @@
+Change Studio and Web URL for uploaded file from Files & Uploads
+=================================================================
+For Example:
+	Studio: /asset-v1:DRC+CS101+2017_T4+type@asset+block@Introduction_to_LMS365.zip
+	Web: http://localhostL8000/asset-v1:DRC+CS101+2017_T4+type@asset+block@Introduction_to_LMS365.zip
+
+1. /cms/static/js/views/assets.js
+
+	displayFinishedUpload: function (resp) {
+	    . . . .
+
+	    Change From:
+                $('.upload-modal .embeddable-xml-input').val(asset.portable_url).show();
+
+	    To:
+        		$('.upload-modal .embeddable-xml-input').val(asset.url).show();
+
+
+
+2. /cms/templates/js/asset.underscore
+
+    # Change:    
+    	<td class="embed-col">
+        . . . .
+
+		    <ul>
+		        <li class="embed-url">
+		            <label>
+		                <span class="label"><%- gettext('Studio:') %></span>
+		                <input type="text" class="embeddable-xml-input" value="<%- url %>" readonly>
+		            </label>
+		        </li>
+		        <li class="external-url">
+		            <label>
+		                <span class="label"><%- gettext('Web:') %></span>
+		                <input type="text" class="embeddable-xml-input" value="<%- external_url %>" readonly>
+		            </label>
+		        </li>
+		    </ul>
+
+
+
+3. /cms/djangoapps/contentstore/views/assets.py
+
+	# In:
+		def _assets_json(request, course_key):
+		. . . .
+
+		    # Add In:
+		    	asset_json.append(_get_asset_json(
+		            request,
+		            asset['displayname'],
+		            . . . .
+
+
+	# In  
+		def _upload_asset(request, course_key):
+		. . . .
+
+		    # Add In:
+		    	'asset': _get_asset_json(
+		            request,
+		            content.name,
+		            . . . .
+
+
+	# Add In:   
+		def _get_asset_json(request, display_name, content_type, date, location, thumbnail_location, locked):
+		. . . .
+
+	        protocol = ('http://', 'https://')[request.is_secure()]
+	    	external_url = protocol + settings.LMS_BASE + asset_url
+	    	. . . .

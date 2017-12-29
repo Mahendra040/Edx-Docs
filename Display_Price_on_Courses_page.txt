@@ -1,0 +1,47 @@
+################ to show price and free tag on /courses page ######################
+
+NOTE: On this page courses are get from cms and js
+
+Used files: 4
+1. lms/templates/discovery/course_card.underscore
+2. lms/static/js/discovery/model/course_card.js
+3. cms/djnagoapps/contentstore/courseware_index.py
+4. cms/envs/common.py
+
+
+
+1. lms/templates/discovery/course_card.underscore
+--- use if condition with expression . If price > 0 thn course price is shown otherwise course is free
+--- example: place this code with div which has class="course-date"
+
+<% if(price > 0) {%>
+    <span style="float:right">Price: $<%- price %></span>
+<% } else {%>
+    <span style="float:right">Free</span>
+<% } %>
+
+
+2. lms/static/js/discovery/model/course_card.js
+--- add extra field on this file whatever you want
+--- remain it blank
+example: price: ''
+
+
+3. cms/djnagoapps/contentstore/courseware_index.py
+--- this file used to put data on price filed which added in course_card.js file
+--- In index_about_information method get price from CourseMode class with min_course_price_for_currencymethod and pass two arguments course key and currency symbol and store on varibale price. Pass this price variable in course_info dictionary
+--- reindex course from studio to apply changes
+
+example: 
+price = CourseMode.min_course_price_for_currency(
+    course.id,
+    settings.PAID_COURSE_REGISTRATION_CURRENCY[0]
+)
+
+
+4. cms/envs/common.py
+--- We uses currency sumbol to get price in index_about_information() method. currency symbol is not in cms/common.py. So place that varibale in this file
+
+example: PAID_COURSE_REGISTRATION_CURRENCY = ['usd', '$']
+
+

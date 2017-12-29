@@ -1,0 +1,19 @@
+Gist Github
+================
+
+1. Create File on https://gist.github.com/
+2. Save and copy script.
+
+
+Use in Studio
+==============
+1. Include postscribe JS in base.html(Studio) and main.html(LMS).
+2. CDN link for postscribe JS: <script src="https://cdnjs.cloudflare.com/ajax/libs/postscribe/2.0.8/postscribe.min.js"></script>
+3. Note: Include postscribe JS before require.js
+4. Create new unit.
+5. Select HTML component and choose Text.
+6. Click on EDIT and open HTML editor.
+7. Write code here:
+	<div id="ad"></div>
+	<script>postscribe('#ad', '<script src="https://gist.github.com/Mahendra040/f658561e33c050a0226a6b0bca9ee2bb.js"><\/script>');
+	</script>

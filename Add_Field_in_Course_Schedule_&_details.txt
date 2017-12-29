@@ -1,0 +1,165 @@
+============================
+Schedule & Details page of Course
+============================
+
+------------------
+common/lib/xmodule/xmodule/course_module.py
+------------------
+
+class CourseFields(object):
+
+    ....
+    ...
+
+    course_category = String(
+        display_name=_("Course Category"),
+        help=_("Select one of the category for the course."),
+        default='',
+        scope=Scope.settings
+    )
+
+
+-----------------
+openedx/core/djangoapps/content/course_overviews/models.py
+-----------------
+
+class CourseOverview(TimeStampedModel):
+
+    ..
+    ..
+    course_category = TextField(null=True)
+
+
+    @classmethod
+    def _create_from_course(cls, course):
+
+        ...
+        ...
+
+        course_overview.course_category = course.course_category
+
+
+----------------
+openedx/core/djangoapps/models/course_details.py
+----------------
+
+class CourseDetails(object):
+
+    def __init__(self, org, course_id, run):
+
+        ...
+        ..
+
+        self.course_category = None
+
+    @classmethod
+    def populate(cls, course_descriptor):
+
+        ..
+        ..
+
+        course_details.course_category = course_descriptor.course_category
+
+
+    @classmethod
+    def update_from_json(cls, course_key, jsondict, user):  # pylint: disable=too-many-statements
+
+        ..
+        ..
+
+        
+        if 'course_category' in jsondict and jsondict['course_category'] != descriptor.course_category:
+            descriptor.course_category = jsondict['course_category']
+            dirty = True
+
+
+--------------
+cms/static/js/models/settings/course_details.js
+--------------
+
+define(['backbone', 'underscore', 'gettext', 'js/models/validation_helpers', 'js/utils/date_utils'],
+    function(Backbone, _, gettext, ValidationHelpers, DateUtils) {
+        var CourseDetails = Backbone.Model.extend({
+        defaults: {
+            
+            ..
+            ..
+
+            course_category: null,
+
+------------
+cms/static/js/views/settings/main.js
+------------
+
+initialize: function(options) {
+
+    ...
+    ..
+    
+    this.$el.find("#course_category").val(this.model.get('course_category'));
+
+
+render: function() {
+
+    ..
+    ..
+
+    this.$el.find('#' + this.fieldToSelectorMap['course_category']).val(this.model.get('course_category'));
+
+
+    fieldToSelectorMap: {
+
+        ..
+        ..
+
+        'course_category': 'course_category',
+
+
+updateModel: function(event) {
+
+
+    ...
+    ..
+
+    case 'course_category':
+
+
+--------------
+cms/djangoapps/contentstore/views/course.py
+--------------
+
+from ucm_config.models import Category
+
+def settings_handler(request, course_key_string):
+
+    ====== add below, before rendering settings.html =====
+
+    categories = Category.objects.all()
+    settings_context['categories'] = categories
+
+-----------
+cms/templates/settings.html
+-----------
+
+
+          <!-- for schedule & category-->
+            <li class="field" id="field-course-category">
+              <label for="course_category">${_("Course Category")}</label>
+              <select id="course_category">
+                <option value="" selected> - </option>
+                % for cat in categories:
+                  <option value="${cat.id}">${cat.name}</option>
+                % endfor
+              </select>
+              <span class="tip tip-stacked">${_("Define a category of the course.")}</span>
+            </li>
+          <!-- for schedule & category-->
+
+
+
+ ----------------- 
+ cms/djangoapps/models/settings/course_metadata.py 
+ ----------------- 
+
+ class CourseMetadata(object): 
+    FILTERED_LIST = [ .. .. 'course_category', ]

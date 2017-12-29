@@ -1,0 +1,168 @@
+		Enabling Badging
+================================
+
+
+* Make Sure Certificates Are Enabled
+
+	1.In the lms.env.json and cms.env.json files, set the value of CERTIFICATES_HTML_VIEW within the FEATURES object to true.
+
+		"FEATURES": {
+		    ...
+		    'CERTIFICATES_HTML_VIEW': true,
+		    ...
+		}
+	2.Save the lms.env.json and cms.env.json files.
+
+*  Install Badgr Server
+
+	note: all this thing do in edxapp
+
+	1. Create dirctory badgr in edx-plateform
+	2. follow instuction as given https://github.com/concentricsky/badgr-server
+	3. at pip install -r requirements-dev.txt command(if error at requirement installation):
+		***For Ficus***
+		In requirements.txt -- > change package cryptography==1.0.2 to cryptography==1.9 
+	4. at grunt dist command :
+		In vagrant user run:
+		1. cd /edx/app/edxapp/edx-platform/badgr
+		2. source env/bin/activate
+		3. cd code
+		4. npm install grunt-contrib-sass --save-dev 
+		5. grunt dist --force
+
+* Run Badgr Server
+
+	1. ./manage.py createsuperuser follow prompts to create your first admin user account
+	2. ./manage.py runserver 0.0.0.0:8005
+	3. Navigate to http://localhost:8005/accounts/login
+	4. login, verify an email address
+	5. create issures and Badges
+
+* Enable Badges in Studio and the Learning Management System
+
+	1. To enable badges, you modify the lms.env.json and cms.env.json files, which are located one level above the edx-platform directory.
+	2. In the lms.env.json and cms.env.json files, in the FEATURES section, set the value of ENABLE_OPENBADGES to True.
+		# Enable OpenBadge support.
+		'ENABLE_OPENBADGES': True,
+	3. In lms.env.json, set the values for the following parameters.
+		BADGR_API_TOKEN: A string containing the API token for the Badgr superuser account. Obtain the token from the /v1/user/auth-token page while logged in to the API as the superuser.
+
+		BADGR_BASE_URL: A string containing the base URL for Badgr Server. The Badgr Server must be installed at a publicly accessible IP address.
+
+		BADGR_ISSUER_SLUG: A string that is the slug for the Badgr issuer. The slug can be obtained from the URL of the Badgr Server page that displays the issuer. For example, in the URL http://exampleserver.com/issuer/test-issuer, the issuer slug is test-issuer.
+
+		############## Badgr OpenBadges generation ##############
+
+		BADGR_API_TOKEN = None                                            ####(http://0.0.0.0:8005/v1/user/auth-token)
+		# Do not add the trailing slash here.
+		BADGR_BASE_URL = "http://localhost:8005"
+		BADGR_ISSUER_SLUG = "test-issuer"                                 #### issuer name 
+	4. Save the lms.env.json and cms.env.json files.
+	5. Run database migrations.
+	6. Restart the Studio and Learning Management System processes so that the updated environment configurations are loaded.
+
+* Enable Badges Within Each Course
+
+	To stop issuing badges in your course, follow these steps.
+
+	1. In Studio, from the Settings menu, select Advanced Settings.
+	2. Locate the Issue Open Badges policy key. The default value is True.
+	3. Change the setting to False and save your changes.
+	4. To enable badging for your course if it was previously disabled, change the value of the key to True.
+
+* Create Course Event Badges for Your Open edX Instance
+
+	1. Access the Django Administration website for your instance of Open edX. To do this, go to https://<host name of your Open edX instance>/admin. For example, 	   this might be https://YourOrganization.org/admin
+	2. Select Site Administration > Badges > Badge Classes.
+	3. Add a badge class for each course event for which you want to issue badges. Examples of course events might be enrolling in five courses, or completing   		three required courses.
+
+	* For each badge class, set the following parameters.
+
+		Slug: A unique identifier that you choose to identify the badge class. This identifier can contain only numbers, lowercase letters, underscores, or hyphens. The slug, combined with the Issuing Component value, uniquely identifies a badge.
+
+		Issuing Component: Identifies the part of the platform that is issuing the badge. This identifier can contain only numbers, lowercase letters,underscores, or hyphens. For the three customizable course event badges that are included in the Open edX platform, the value for Issuing Component must be openedx__course (with two underscores). For course completion badges that are included in the Open edX platform, the issuing component value should be empty.
+
+		For new badge types that you create, specify an Issuing Component value that identifies the software component responsible for issuing the badge. For example, if badges are issued by the course management component, you might define Issuing Component as platform__course; if badges are issued based on activity in course discussions, you might define Issuing Component as platform__discussions.
+
+		1. Display name: The human readable badge name that is used when badges are shown to learners, for example, in the Accomplishments view of learners’ profiles.
+
+		2. Course ID: This value should be blank for course event type badges, as they are not associated with a single course.
+
+		3. Description: A description of this badge.
+
+		4. Criteria: A description of the criteria for awarding this badge.
+
+		5. Mode: The course mode for the course associated with this badge, if applicable.
+
+		6. Image: The badge image to use for this badge. Badge images should be square .png files less than 250KB in size.
+
+	* An example of a badge class configuration might have the following values.
+
+		slug: enrolled_three
+
+		issuing_component: openedx__course
+
+		display_name: Enroll in Three Courses
+
+		description: Enrolled in three courses
+
+		criteria: A learner must enroll in three courses to receive this badge
+
+		image: triple_enrollment_badge_image.png										###upload only .png and square image file
+
+	4. When you have finished defining the badge class, select Save
+
+* Create a new course event badge configuration
+
+	 1. Select Site Administration > Badges > Course event badges configurations > Add course event badges configuration.
+	 2. Within the new course event badge configuration, set the following parameters.
+
+			Courses completed: Define badges to be awarded for completing a certain number of courses, or completion of specific courses. Define one badge per line. On each line, enter the number of courses that must be completed, followed by a comma and then the slug of the badge class to associate with this badge.
+
+			For example, to configure two badges, one that is awarded when a learner completes 3 courses, and another that is awarded when a learner completes 8 courses, you add two lines to the Courses completed field.
+
+			3,completed_three 8,completed_eight
+
+			where completed_three and completed_eight are badge slugs that you previously defined in badge classes.
+
+			Courses enrolled: Define badges to be awarded for enrolling in a certain number of courses, or enrolling in specific courses. Define one badge per line. On each line, enter the number of courses that must be enrolled in, followed by a comma and then the slug of the badge class to associate with this badge.
+
+			For example, to configure a badge that is awarded when a learner enrolls in 5 courses, you add this definition.
+
+			5,enrolled_five
+
+			where enrolled_five is a badge slug that you previously defined in a badge class.
+
+			Course groups: Define badges to be awarded for completing a list of specific courses. Define one badge per line. On each line, enter the slug of the badge class, a comma, then the list of course keys.
+
+			For example, to configure a badge that is awarded when a learner completes the 3 prerequisite courses in a series, you add this definition.
+
+			prereq_computerscience_badge_slug,course1_identifier,course2_identifier,course_3_identifier
+
+			where prereq_computerscience_badge_slug is a badge slug that you previously defined in a badge class, and course1_identifier, course2_identifier, and course3_identifier are the Course IDs for the three courses that must be completed for this badge.
+
+	* An example of a Course event badges configurations for previous given badge class might have the following values.
+
+		Courses completed: 3,enrolled_three
+		Courses enrolled: 3,enrolled_three
+		Course groups : (if required)
+
+	3. When you have finished defining badges in the configuration, select Save.
+	4. To activate this configuration, select Enabled at the top of the configuration page.
+
+
+* Check Badge Class in Badge Server
+
+	1. open http://0.0.0.0:8005/staff/
+	2. Select Site Administration > Badges > Badge Classes.
+
+
+
+
+"BADGR_API_TOKEN": "28e73307d2bc53b4d0ea5a981143d6e84b4b685e",
+"BADGR_BASE_URL": "http://badge.edx.drcsystems.com",
+"BADGR_ISSUER_SLUG": "staff",
+
+sudo apt-get install python-dev
+sudo apt-get install libffi-dev
+pip install -U Celer

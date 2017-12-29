@@ -1,0 +1,54 @@
+1. edx-platform/common/djangoapps/util/date_utils.py
+----------------------------------------------------
+    Replace:return new Date(Date.UTC(
+                    date.getFullYear(), date.getMonth(), date.getDate(),
+                    time.getHours(), time.getMinutes()
+                ));
+    with:   return new Date(
+                    date.getFullYear(), date.getMonth(), date.getDate(),
+                    time.getHours(), time.getMinutes()
+                );
+
+
+    Replace:return new Date(Date.UTC(
+                date.getFullYear(), date.getMonth(), date.getDate()));
+    with:   return new Date(
+                date.getFullYear(), date.getMonth(), date.getDate());
+
+
+    Replace: datetime = date.parse(datetime);
+    With:    datetime = Date.parse(new Date(datetime));
+
+
+    Replace: {timeZone: 'UTC', timeZoneName: 'short'}
+    With:    {timeZone: 'Asia/Kolkata', timeZoneName: 'short'}
+
+
+2. common/djangoapps/util/date_utils.py
+---------------------------------------------
+    import pytz
+    from django.conf import settings
+
+    After: if dtime.tzinfo is not None:
+    Add: dtime = dtime.astimezone(pytz.timezone(settings.TIME_ZONE))
+
+    Ex:
+         if dtime.tzinfo is not None:
+            dtime = dtime.astimezone(pytz.timezone(settings.TIME_ZONE))
+             try:
+                 timezone = u" " + dtime.tzinfo.tzname(dtime)
+
+
+3. edx-platform/themes/studybytech/cms/templates/settings.html
+---------------------------------------------------------------
+	Replace UTC word with IST
+
+
+4. edx-platform/cms/templates/js/release-date-editor.underscore
+------------------------------------------------------------
+	Replace UTC word with IST
+
+
+5. edx-platform/cms/templates/js/due-date-editor.underscore
+------------------------------------------------------------
+	Replace UTC word with IST

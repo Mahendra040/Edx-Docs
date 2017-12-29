@@ -1,0 +1,48 @@
+EDX - GEA XBLOCK
+
+Installations:
+
+1. Make sure you have the following items in your config file - cms.env.json
+
+	"ALLOW_ALL_ADVANCED_COMPONENTS": True
+	If it does not exist, insert it into the "FEATURES".
+
+2. Execute the commands
+
+	Switch to user "edxapp"
+		sudo -H -u edxapp bash
+
+	Change directory to "edxapp" home
+		cd ~
+
+	Loading the virtual environment of edxapp
+		source venvs/edxapp/bin/activate
+
+	Clone the XBlock to certain directory
+		https://github.com/openfun/edx-gea.git
+
+	Install
+		pip install -e ./edx-gea
+		deactivate
+
+	Back to the default user
+		exit
+
+3. Add edx_gea to installed Django apps
+
+	In /edx/app/edxapp/edx-platform/cms/envs/common.py, add 'edx_gea' to OPTIONAL_APPS
+	In /edx/app/edxapp/edx-platform/lms/envs/common.py, add 'edx_gea' to OPTIONAL_APPS
+
+4. Restart the CMS platform
+	source /edx/bin/supervisorctl restart edxapp:
+
+
+Activate the XBlock in your course
+	Go to Settings -> Advanced Settings and set advanced_modules to ["edx_gea"].
+
+Use the XBlock in a unit
+	Select Advanced -> External Activity Grader.
+
+
+
+for more information visit : http://edx-gea.readthedocs.io/en/dev/

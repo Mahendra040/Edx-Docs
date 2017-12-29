@@ -1,0 +1,52 @@
+1. lms/template/courseware/courseware.html
+
+    Add Before: % if getattr(course, 'entrance_exam_enabled')
+
+        <script type="text/javascript">
+            $(document).ajaxSuccess(function(event, xhr, settings) {
+                if (settings.url.indexOf("xmodule_handler/problem_check") > -1) {
+                    var data = JSON.parse(xhr.responseText);
+                    if (data.subsection_completed){
+                        location.reload();
+                    }
+                }
+            });
+        </script>
+
+
+2. lms/djangoapps/courseware/module_render.py
+
+    def _invoke_xblock_handler:
+        ....
+        ....
+        resp = instance.handle(handler, req, suffix)
+        if course.enable_subsection_gating:
+            update_response = {"subsection_completed": user_has_completed_current_subsection(
+                    request, course, instance)}
+            resp = append_data_to_webob_response(resp, update_response)
+
+
+
+3. Create function:
+    def user_has_completed_current_subsection(request, course, instance):
+        section = instance.get_parent().get_parent()
+        chapter = section.get_parent()
+        field_data_cache = FieldDataCache.cache_for_descriptor_descendents(course.id, request.user, course, depth=None)
+        table_of_contents = toc_for_course(request.user, request, course, chapter.url_name,
+                                           section.url_name, field_data_cache)
+
+        if table_of_contents['next_of_active_section']:
+            return True
+        return False
+
+
+
+
+lms/template/student_account/login_and_register.html
+
+Add at last:
+<script type="text/javascript">
+    $(document).ready(function(){
+        document.location.hash = "http://edx.aifest.org/register";
+    });
+</script>

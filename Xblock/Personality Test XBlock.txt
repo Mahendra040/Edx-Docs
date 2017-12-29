@@ -1,0 +1,41 @@
+Personality Test XBlock
+
+Installations:
+
+1. Make sure you have the following items in your config file - cms.env.json and lms.env.json
+
+	"ALLOW_ALL_ADVANCED_COMPONENTS": True
+	If it does not exist, insert it into the "FEATURES".
+
+2. Execute the commands
+
+	Switch to user "edxapp"
+		sudo -H -u edxapp bash
+	
+	Change directory to "edxapp" home
+		cd ~
+
+	Loading the virtual environment of edxapp
+		source venvs/edxapp/bin/activate
+
+	Clone the XBlock to certain directory
+
+		git clone https://github.com/IONISx/xblock-personality-test.git
+		pip install -e ./xblock-personality-test
+		cd xblock-personality-test
+		pip install -r requirements.txt
+		deactivate
+
+	Back to the user "main-user"
+		exit
+
+3. Restart the CMS platform
+
+	source /edx/bin/supervisorctl restart edxapp:
+
+4. courses settings
+
+	Go to Settings -> Advanced Settings and set advanced_modules to ["personalitytest"].
+
+5. Use the XBlock in a unit
+	Select Advanced -> Personality Test in your unit.

@@ -1,0 +1,6 @@
+1. upload instanthangouts.0.1.0.js
+2. in html component:
+	
+<p>Join an instant hangout by selecting the button below. You can use the hangout to have live video discussions with other learners.</p>
+<script src="/static/instanthangouts.0.1.0.js" async=""></script>
+<div class="instanthangouts" render="createhangout"></div>

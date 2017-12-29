@@ -1,0 +1,35 @@
+Microsoft Azure:
+=================
+
+1.	Login : https://portal.azure.com/
+2.	Click on (+ New) button at left side navigation.
+3.	Locate Azure Active Directory, and then select Create.
+4.	Enter a name, domain name, and country.
+5.	Create New Application:
+	
+	a. Find new created Azure AD.
+	b. Click on App registrations and then click new application registration.
+	c. Enter a name for the app, and then select Web Application.
+	d. For Sign-on URL, enter <LMS URI>/auth/complete/azuread-oauth2/. For example, you might enter http://localhost:8000/auth/complete/azuread-oauth2/.
+	e. Finish creating the new app.
+
+6. Click on your application and open.
+7. Click on Settings at top-left corner and then click on All settings at bottom-right corner.
+8. Open Properties from GENERAL section.
+9. Change App ID URL, enter <LMS URI>/sign in. For example, you might enter http://localhost:8000/sign in.
+10. Enable multi-tenant support.
+11. Your Application ID is Client ID (For example: 9a8adb39-4264-4f23-9e3e-7ecd082649e8)
+12. Open Keys from API ACCESS section.
+13. Add key description and Duration(In 2 Years) and then select Save to create a secret key. Note the value of the key. (For example, the key value may be abcdef12341yHlmOrR8D3vlV1cD2VtL7k9xk9DSB8vw=.)
+14. Open Required permissions from API ACCESS section.
+15. Locate the Delegated Permissions option for Windows Azure Active Directory, and then select Sign in and read user profile.
+16. Verify the Azure AD domain name. To do this, follow these steps.
+
+	a. In the portal, locate the new Active Directory.
+	b. Select Domains, select Add, and then add the root domain you want to use (for example, edx.org). Make sure that you add the root domain first, and then follow the TXT record verification process.
+	c. (optional) After the domain has been verified, add subdomains (for example, courses.edx.org). Subdomains also request verification, but do not need it.
+
+
+For more information:
+=====================
+http://edx.readthedocs.io/projects/edx-installing-configuring-and-running/en/latest/configuration/tpa/tpa_integrate_open/tpa_oauth.html#register-the-open-edx-instance-with-azure-active-directory

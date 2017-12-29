@@ -1,0 +1,97 @@
+Ooyala XBlock
+
+This XBlock allows to include Ooyala videos within an edX course.
+
+It supports:
+
+	1. Ooyala Video, the component to visualize the video.
+	2. Transcript, which allows your users to interact with your video using text capabilities (video words, search, navigation).
+	3. Overlays, which allows you to place raw text or HTML content at a specific moment in your video.
+	4. Player token, which allows you to secure your video content using a token with an expiration time.
+
+
+1. Installation
+
+		1.download zip file from https://github.com/edx-solutions/xblock-ooyala
+		2.put that directory in edx-plateform
+		3.run vagrant and go to edx-plateform
+		4.after that go in ooyala XBlock directory and run pip install -r requirements.txt
+		5.start studio
+
+2. Enable Ooyala XBlock
+		
+		1.From the main page of a specific course, click on Settings, Advanced Settings in the top menu.
+		2.Locate the advanced_modules policy key, and add "ooyala-player" to the policy value list.
+		3.Click on the Save changes button.
+
+3. Settings
+
+		1.Title: The title displayed in the unit for this xblock.
+		2.Content Id: Ooyala content identifier.
+		3.Transcript File Id: 3Play transcript file identifier. Leave empty if your video does not use a transcript.
+		4.3Play Api key: 3play API key, to access the 3Play transcript file
+		5.Enable Player Token: has to be set to True if you want to use short-lived tokens. Defaults to False.
+		6.Partner Code: Ooyala partner code (also known as pcode) is needed to be able to generate a player token. Only required when using short-lived tokens.
+		7.Api Key: Ooyala API key. Only required when using a transcript file and/or short-lived tokens.
+		8.Api Secret Key: Ooyala secret key. Only required when using short-lived tokens.
+		9.Player Width: The width of the player in valid CSS units; defaults to 760px.
+		10.Player Height: The height of the player in valid CSS units; defaults to 427px.
+		11.Expiration Time: the expiration time of a short-lived token in seconds; defaults to 600.
+		12.XML Configuration: Allows you to configure advanced properties of the player (ie. overlays) by editing the XML.
+
+4. Content ID
+
+		1. for content id first create account in http://www.ooyala.com/
+		2. Log in to the http://www.ooyala.com/. The Backlot UI opens.
+		3. click on ADD NEW CONTENT and select VIDEO
+		4. upload video file
+		5. after uploading Click the Embed tab,
+		6. given Content Id copy and paste in studio
+
+5. Api Key
+
+		1. Click on ACCOUNT tab and open Developers
+		2. Here at left side API Key given copy that and paste in studio
+		3. Here API Secret key also given
+
+6. Partner Code(pcode)
+
+		Your pcode is the alphanumeric string that precedes the period. For example, if the API key is xxxxxxxxxxxxxxxxxxxxxxxxxxxx.xxxxx, then use the first 28 characters (xxxxxxxxxxxxxxxxxxxxxxxxxxxx) for the pcode.
+
+7. Overlays
+
+		In studio edit, you can add messages to be displayed at certain points while the video is playing using overlays. You can add an overlay in the studio by editing the XML Configuration field.
+
+		Each overlay is configured using an <overlay> tag. The start and end attributes control the time during video play while the overlay is visible and should be given in seconds.
+
+		The content of an <overlay> tag can be either plain text or HTML content wrapped in a <html> tag.
+
+		All overlays should be grouped under an <overlays> tag. Example:
+
+		<ooyala>
+		  <overlays>
+		    <overlay start="39" end="45"><html>Thats <b>Chris!!</b> one of our colleagues!</html></overlay>
+		    <overlay start="4"  end="15"><html><a href='http://www.edx.org'>Welcome</a> to <b>our course</b>!</html></overlay>
+		    <overlay start="16" end="20">This is raw text</overlay>
+		  </overlays>
+		</ooyala>
+
+
+for more information use http://help.ooyala.com/video-platform/concepts/book_dev_map.html
+
+
+Running tests
+
+1. In a virtualenv, run
+	$ (cd ../xblock-sdk/; pip install -r requirements.txt)
+	$ (cd ../xblock-ooyala/; pip install -r tests/requirements.txt)
+
+1. In the xblock-sdk repository, create the following configuration file in workbench/settings_ooyala.py
+	
+	from settings import *
+
+	INSTALLED_APPS += ('ooyala_player',)
+
+
+1. To run the tests, from the xblock-ooyala repository root:
+	$ DJANGO_SETTINGS_MODULE="workbench.settings_ooyala" nosetests --rednose --verbose --with-cover --cover-package=ooyala_player

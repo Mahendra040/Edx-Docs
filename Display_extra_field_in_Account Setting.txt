@@ -1,0 +1,49 @@
+Display Extra Field in Account settings page.
+==============================================
+--> Here display Mailing Address Field in Account settings page
+
+
+[1] /common/test/acceptance/tests/lms/test_account_settings.py
+
+    Under:  
+        def test_all_sections_and_fields_are_present(self):
+        """
+        Scenario: Verify that all sections and fields are present on the page.
+        """
+        expected_sections_structure = [
+            {
+            ............
+            ............
+            },
+            {
+                'title': 'Additional Information',
+                'fields': [
+                    ...........
+                    'Mailing Address'       ## Add This
+                ]
+            }
+[2] /lms/static/js/student_account/views/account_settings_factory.js
+
+    Under:
+        aboutSectionsData = [
+                 {
+                    title: gettext('Basic Account Information'),
+                    subtitle: gettext('These settings include basic information about your account. You can also specify additional information and see your linked social accounts on this page.'), /* jshint ignore:line */
+                    fields: [
+                        {
+                        ..........
+                        ..........
+                        }
+                        {
+                            title: gettext('Additional Information'),
+                            fields: [
+                            .........
+                            {
+                            view: new AccountSettingsFieldViews.TextFieldView({
+                                model: userAccountModel,
+                                title: gettext('Mailing Address'),
+                                valueAttribute: 'mailing_address',
+                                persistChanges: true
+                                })
+                            }
+                        }

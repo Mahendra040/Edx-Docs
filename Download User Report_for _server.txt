@@ -1,0 +1,35 @@
+Download User Report:
+
+solved this issue with creating link to true location of .csv files(/tmp/edx-s3/grades) in /edx/var/edxapp/media directory
+
+run this command in edxuser:
+ln -s /tmp/edx-s3/grades /edx/var/edxapp/media
+
+and then make little changes in nginx configuration.
+
+nano /edx/app/nginx/sites-available/lms
+
+add following rule:
+
+location ~ ^/grades/(?P<file>.*) {
+    root /edx/var/edxapp/media/grades;
+    try_files /$file =404;
+    expires 31536000s;
+}
+
+Edit location rule for media, tall to search in /grades if there is no such file in /media
+
+location ~ ^/media/(?P<file>.*) {
+    root /edx/var/edxapp/media;
+    try_files /$file /grades/$file;
+    expires 31536000s;
+}
+
+and then restart nginx
+
+service nginx restart
+
+It should work ;-)
+
+
+for more info visit: https://groups.google.com/forum/#!topic/edx-code/rTI8WO9q4f0

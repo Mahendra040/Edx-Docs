@@ -1,0 +1,62 @@
+LTI Provider(LMS)
+==================
+
+1. Go to https://<host name of your Open edX instance>/admin. For example,this might be https://YourOrganization.org/admin
+2. LTI Provider-->LTI Consumers-->Add Lti Consumer
+		Consumer name: Name of Consumer (For Example: edx_consumer)
+		Consumer key: Consumer key (For Example: XQfSHNjRwP)
+		Consumer secret: Consumer Secret (For Example: beZDDwcmxdcRDKukpZ4Bd4)
+		Instance guid: (For Example: lmsng.school.edu)
+	click on save.
+3. Third_Party_Auth-->Provider Configuration (LTI)-->Add Provider Configuration (LTI)
+		Enable: True
+		Name : Name of Consumer
+		Lti consumer key: Consumer key (For Example: XQfSHNjRwP)
+		Lti hostname: Provide your consumer Host name (For Example : 192.168.1.9:8000)
+		Lti consumer secret: Consumer Secret (For Example: beZDDwcmxdcRDKukpZ4Bd4)
+		Lti max timestamp age: The maximum age of oauth_timestamp values, in seconds.(For Example: 10)
+	click on save.
+
+
+
+
+
+LTI Consumer(one django app which work as LTI Consumer)
+===================================================
+
+1. Create Simple Django app
+2. To Access data from provider you need main three element url, Consumer key, Consumer secret which is provided by LTI Provider
+3. For Example Like : URL : http://192.168.1.9:8000/lti_provider/courses/course-v1:DRC_Systems+CS102+2016_T2/													block-v1:DRC_Systems+CS102+2016_T2+type@video+block@0ff03f925a3e4c578b0727002b96ad00 
+					: Consumer Key : XQfSHNjRwP
+					: Consumer Secret : beZDDwcmxdcRDKukpZ4Bd4
+4. To Access data from provide you need to pass some variable with value necessary whic are given below: 
+		1. roles = (For Example :"Instructor") 
+    	2. context_id = (For Example :"S3294476")
+    	3. oauth_version = (For Example :"1.0")
+    	4. oauth_consumer_key = (For Example :"XQfSHNjRwP")
+    	5. oauth_signature_method = (For Example :"HMAC-SHA1")
+    	6. oauth_timestamp = Current Timestamp  (For Example :str(int(time.time())))
+    	7. oauth_nonce = (For Example :nonce = uuid.uuid1(), str(nonce.hex))
+    	8. user_id = (For Example :"29123")
+    	9. tool_consumer_instance_guid = (For Example :"lmsng.school.edu")
+    	10. oauth_signature
+
+    * oauth_signature *
+    1. You need to generate oauth_signature for user authorization. you can generate oauth_signature using given data + url +method
+    2. Here also need to know that which oauth_signature_method use to genrate oauth_signature.
+
+    For Example :
+    	1. Let take one string in which all data 
+    		data = "context_id="+context_id+"&oauth_consumer_key="+oauth_consumer_key+"&oauth_nonce="+oauth_nonce+"&oauth_signature_method="+oauth_signature_method+"&oauth_timestamp="+oauth_timestamp+"&oauth_version="+oauth_version+"&roles="+roles+"&tool_consumer_instance_guid="+tool_consumer_instance_guid+"&user_id="+user_id
+    	2. After thet you need to Encode that data string. For Example:
+    		base_data = urllib.quote(data, safe= '')
+    	3. Encode url also. For Example:
+    		base_url = urllib.quote(url, safe= '')
+    	4. Now create Base String. For Example:
+    		base_string ="POST&"+base_url+"&"+base_data
+    	5. hash_obj = hmac.new(secret_key.encode('utf-8'), base_string.encode('utf-8'), hashlib.sha1)
+    	   oauth_signature = binascii.b2a_base64(hash_obj.digest())[:-1].decode('utf-8')
+
+5. Create one form and pass all data, Give form target to go iframe id
+6. Create one Iframe and give width and height. Now your response show in iframe
+

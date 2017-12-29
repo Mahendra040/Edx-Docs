@@ -1,0 +1,86 @@
+EDX-NOTES
+===========
+
+====Step-by-step guide=====
+
+	1. Make a port available for your main machine.
+		vagrant halt
+		# edit Vagrantfile, to line 99 (near other port forwarding stuff) add:
+		` config.vm.network :forwarded_port, guest: 8120, host: 8120`
+		vagrant up
+		vagrant ssh
+
+	2. Install and start the notes service.
+
+		Note that the following instructions have you cloning the edx-notes-api code directly into devstack. If you are going to be changing this code, instead modify your Vagrantfile to set up the file directory mapping for edx-notes-api, in the same was that is done for edx-platform, ora, etc. Make the "owner" (in the second block of configuration that needs to be updated) "edxapp".
+		 
+		sudo su edxapp
+		pip install virtualenvwrapper
+		source virtualenvwrapper.sh
+		cd
+		git clone https://github.com/edx/edx-notes-api.git (only if you did not change your Vagrantfile as noted above)
+		cd edx-notes-api
+		mkvirtualenv notes
+		workon notes
+		make requirements
+		./manage.py migrate
+		make create-index
+		make run
+
+	3. After you have already done the install step, you can run the service with just these lines:
+		
+		sudo su edxapp
+		source virtualenvwrapper.sh
+		cd ~/edx-notes-api
+		workon notes
+		cd edx-notes-api 
+		make run
+	 
+	4. In order for the edx_notes_api application to authenticate against the LMS, an oauth client configuration will need to be created in your LMS.  This can be done from the Django admin application as a superuser.  The admin application is hosted at http://localhost:8000/admin.  The client details need to be available to the notes application   Note that in this document, the hostname lms.example.com will be used, but this value will need to be replaced with the appropriate value for your environment.
+
+		On the admin page, to go "Oath2" and click "Add" by "Clients". Fill out the following fields. Note: leave the ID field blank.
+
+		name ==> edx-notes
+		url	==> http://0.0.0.0:8000/ (not positive it is necessary to supply this value-- could try first without)
+		redirect url ==> http://0.0.0.0:8000/complete/edx-oidc/
+		client id ==> edx-notes-id
+		client secret ==> edx-notes-secret
+		client type	==> Public (not sure if Confidential will also work)
+
+		On the admin page, to go "trustedclient" and click "Add trusted client" by "Clients". Fill out the following fields. 
+
+			Client : http://0.0.0.0:8000/complete/edx-oidc/
+
+	5. Edit lms/envs/common.py and cms/envs/common.py to set ENABLE_EDXNOTES to True 
+
+	6. Edit lms.env.json and cms.env.json
+
+		"ENABLE_EDXNOTES" : true
+		"EDXNOTES_INTERNAL_API": "http://localhost:8120/api/v1",
+    	"EDXNOTES_PUBLIC_API": "http://localhost:8120/api/v1",
+		 
+	7. Start CMS and LMS. Create a new course in Studio.
+		 
+	8. In the course Advanced Settings, set "Enable Student Notes" to true.
+
+You should now be able to view the course in the LMS, see a "Notes" tab, and add notes to HTML components in the courseware.
+
+
+Troubleshooting:
+================
+	1. I get a stacktrace with "ValueError: Cannot assign None: "AccessToken.user" does not allow null values." when trying to view Courseware or the Notes tab.
+
+		If you are logged into the LMS with a user with special access (for instance, staff@example.com or the superuser for using the admin table), try logging in instead as a "normal" user like honor@example.com. I was having issues with the anonymous ID for staff and my superuser not matching the computed anonymous ID, which led to this error.
+
+	2. I get an error "ValueError: Unable to configure handler 'local': [Errno13] Permission denied: '/var/tmp/edx.log'" while running any make/migrate command in step 2.
+	
+		This is probably because of permission issues for log file, try to run "chmod 777 /var/tmp/edx.log" to change the permissions.
+
+	3. I'm done with all the steps and notes service is running but still not able to connect with LMS with message "EdxNotes Service is unavailable".
+	
+		Make sure that the port used by LMS to communicate matches with the notes service. 
+
+
+Also maintain packge version conflict.
+
+for more information visit : https://openedx.atlassian.net/wiki/spaces/LEARNER/pages/27558611/Enabling+Student+Notes+on+Devstack

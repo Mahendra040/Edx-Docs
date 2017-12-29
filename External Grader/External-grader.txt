@@ -1,0 +1,213 @@
+For Ficus:
+=============
+Configuration : /edx/app/xqueue/xqueue.env.json
+{
+    "LOCAL_LOGLEVEL": "INFO", 
+    "LOGGING_ENV": "sandbox", 
+    "LOG_DIR": "/edx/var/logs/xqueue", 
+    "RABBIT_HOST": "localhost", 
+    "RABBIT_PORT": 5672, 
+    "RABBIT_TLS": false, 
+    "RABBIT_VHOST": "/", 
+    "S3_BUCKET": "sandbox-bucket", 
+    "S3_PATH_PREFIX": "sandbox-xqueue", 
+    "SYSLOG_SERVER": "localhost", 
+    "UPLOAD_BUCKET": "sandbox-bucket", 
+    "UPLOAD_PATH_PREFIX": "sandbox-xqueue", 
+    "XQUEUES": {
+        "certificates": null,
+        "java-queue": "http://localhost:1710", 
+        "python-queue": "http://localhost:1711", //For multiple queues
+        "open-ended": null, 
+        "open-ended-message": null, 
+        "test-pull": null
+    }, 
+    "XQUEUE_WORKERS_PER_QUEUE": 12
+}
+
+Configuration: /edx/app/xqueue/xqueue.auth.json
+{
+    "AWS_ACCESS_KEY_ID": "", 
+    "AWS_SECRET_ACCESS_KEY": "", 
+    "DATABASES": {
+        "default": {
+            "ATOMIC_REQUESTS": true, 
+            "ENGINE": "django.db.backends.mysql", 
+            "HOST": "localhost", 
+            "NAME": "xqueue", 
+            "PASSWORD": "password", 
+            "PORT": "3306", 
+            "USER": "xqueue001"
+        }
+    }, 
+    "RABBITMQ_PASS": "edx", 
+    "RABBITMQ_USER": "edx", 
+    "REQUESTS_BASIC_AUTH": [
+        "edx", 
+        "edx"
+    ], 
+    "SWIFT_AUTH_URL": "", 
+    "SWIFT_AUTH_VERSION": 1, 
+    "SWIFT_KEY": "", 
+    "SWIFT_REGION_NAME": "", 
+    "SWIFT_TENANT_ID": "", 
+    "SWIFT_TENANT_NAME": "", 
+    "SWIFT_USERNAME": "", 
+    "USERS": {
+        "lms": "password"
+    }
+}
+
+Copy Java-Grader
+================
+From: https://github.com/huynq55/java-grader.git
+$ cd /edx
+/edx$ git clone https://github.com/huynq55/java-grader.git
+run java-grader:$ sudo python /edx/java-grader/JavaGrader.py
+Import edX course: 2014_T12.R1tVlz.tar.gz
+
+Copy Python-Grader
+==================
+From: https://github.com/dagg/OpenEdxExternalGrader.git
+Copy /edx/
+/edx$ git clone https://github.com/dagg/OpenEdxExternalGrader.git
+run python-Grader:$ sudo python /edx/OpenEdxExternalGrader/PythonGrader.py
+Import edX course: course.0hhL51.tar.gz
+
+Note: Run both grader accorading to given port in /edx/app/xqueue/xqueue.env.json
+
+
+Restart Xqueue:
+===============
+$ sudo pip install pytest
+$ sudo /edx/bin/supervisorctl restart xqueue:
+$ sudo /edx/bin/supervisorctl restart xqueue_consumer:
+
+Create Advance Custom Problem in Studio:
+=======================================
+For Java grader
+---------------
+<problem>
+  <text>
+    <p>What will be the output of the following snippet ?</p>
+  </text>
+  <coderesponse queuename="java-queue">
+    <textbox mode="java" tabsize="4"/>
+    <codeparam>
+      <initial_display>
+			public class Program {
+			    public static int Puzzle(int x) {
+			        return 2*x;
+			    }
+			}
+			</initial_display>
+      <answer_display>
+      		public class Program {
+			    public static int Puzzle(int x) {
+			        return 2*x;
+			    }
+			}
+			</answer_display>
+      <grader_payload>
+{"problem_name": "Java Grader"}
+			</grader_payload>
+    </codeparam>
+  </coderesponse>
+  <table>
+    <tr>
+      <th>Input x</th>
+      <th>Expected</th>
+    </tr>
+    <tr>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>4</td>
+    </tr>
+  </table>
+</problem>
+
+For Python-grader
+-----------------
+<problem>
+  <text>
+    <p>Create a method called PP1 that adds two numbers</p>
+  </text>
+<!-- The following is essential, "py-queue" is also set in the xqueue configuration
+and makes sure that this problem is forwarded to the appropriate queue to be graded -->
+  <coderesponse queuename="python-queue">
+    <textbox mode="python" tabsize="4"/>
+    <codeparam>
+      <initial_display>
+def PP1(x,y):
+	return x+y
+      </initial_display>
+      <answer_display>
+def PP1(x,y):
+    return x+y
+	</answer_display>
+	<grader_payload>
+{"problem_name": "PP1"}
+	</grader_payload>
+    </codeparam>
+  </coderesponse>
+  <table>
+    <tr>
+      <th>Input x</th>
+      <th>Input y</th>
+      <th>Expected</th>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>1</td>
+      <td>2</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>5</td>
+      <td>6</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1</td>
+      <td>3</td>
+    </tr>
+  </table>
+</problem>
+
+
+Check this problem in LMS side.
+
+For continue running grader on server:
+=======================================
+$ sudo python /edx/java-grader/JavaGrader.py &
+$ sudo python /edx/OpenEdxExternalGrader/PythonGrader.py &
+
+
+
+View all Port status:
+======================
+
+sudo netstat -tulnp
+
+Kill Porcess: sudo kill -9 9702<Your port>
+
+
+
+
+
+
+For more info visit: https://groups.google.com/forum/#!msg/edx-code/-xMxjjg6uv8/nSHvkBn0HAAJ
+For more info visit: https://github.com/huynq55/java-grader
+for more info: https://github.com/dagg/OpenEdxExternalGrader

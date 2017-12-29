@@ -1,0 +1,61 @@
+NOTE: CCX for a course is disabled by default.
+
+Enable CCX
+===========
+1. lms.env.json > CUSTOM_COURSES_EDX > true
+2. studio > advanced settings > Enable CCX > true
+
+
+Add a CCX Coach
+===============
+
+Note:-
+======
+* The first step to create a CCX is to create a CCX coach in an existing course. A CCX can have only one CCX coach.
+* You add a CCX coach through the Instructor Dashboard in the LMS. Ensure you have the Admin role in the course.
+* In addition, ensure that the user whom you would like to add as a CCX coach has registered in the LMS.
+
+1. migrate lms
+    ./manage.py lms migrate --settings=devstack
+
+2. LMS > Enter in course > Instructor > Membership > Course Team Management > Select a course team role > CCX Coaches
+
+3. Enter the CCX coach’s username or email address and select Add CCX Coach.
+
+
+Create the Custom Course
+=========================
+1. LMS > go to course > CCX coach > enter ccx course name > Coach a new Custom Course for edX
+
+
+CCX Coach Dashboard
+====================
+1. Enrollment: add students list
+2. Schedule: add course content
+3. Student Admin: view student gradebook and download gradebook
+4. Grading Policy: change grading policy (if possible do not chnage it)
+
+
+DELETE CCX COURSE
+===================
+1. comment one line locate in /edx-platform/lms/djangoapps/ccx/api/v0/views.py
+    def get_object(self, course_id, is_ccx=False):
+        # self.check_object_permissions(self.request, course_object)     //commnet this line.
+
+2. Enter this url in browser
+    http://{your domain}/api/ccx/v0/ccx/<ccx course id>
+    example:
+    http://{your domain}/api/ccx/v0/ccx/ccx-v1:DRC+subject-5+2016_t1+ccx@3
+ 
+3. login with coach username and password
+
+4. Click on OPTIONS button.
+
+5. Click on DELETE button.
+
+6. Course deleted successfully. Just check in your dashboard.
+
+
+Reference link: 
+===============
+http://edx.readthedocs.io/projects/open-edx-building-and-running-a-course/en/latest/set_up_course/custom_courses.html#add-a-ccx-coach

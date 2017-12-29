@@ -1,0 +1,198 @@
+Add Extra field in registartion page without external app.
+==========================================================
+--> Here extra added ForeignKey field is ship_rank from ship_rank app and it's required
+--> One more added CharField is company_name and it's optional 
+
+1./common/djangoapps/student/models.py
+
+        from ship_rank.models import ShipRank
+        class UserProfile(models.Model):
+            user = models.OneToOneField(User, unique=True, db_index=True, related_name='profile')
+            name = models.CharField(blank=True, max_length=255, db_index=True)
+            ...
+            ...
+
+            company_name = models.CharField(blank=True, null=True, max_length=100)
+            ship_rank = models.ForeignKey(ShipRank, null=True, blank=True, on_delete=models.CASCADE)
+
+
+2./common/djangoapps/student/views.py
+
+        def create_account_with_params(request, params):
+            ....
+            ....
+
+            identity_args = [
+                user.id,  # pylint: disable=no-member
+                {
+                    'email': user.email,
+                    'username': user.username,
+                    'name': profile.name,
+                    ...
+                    ...
+
+                    'companyName': profile.company_name,
+                    'shipRank':profile.ship_rank,
+                }
+            ]
+
+        def _do_create_account(form, custom_form=None):
+            ...
+            ...
+
+            profile_fields = [
+                "name", "level_of_education", "gender", "mailing_address", "city", "country", "goals",
+                "year_of_birth", "company_name", "ship_rank_id"
+            ]
+            form.cleaned_data['ship_rank_id'] = form.cleaned_data['ship_rank']
+
+
+3./openedx/core/djangoapps/user_api/views.py
+
+        from ship_rank.models import ShipRank
+        from django.utils.translation import ugettext_noop
+
+    I.  class RegistrationView(APIView):
+
+            EXTRA_FIELDS = [
+                "first_name",
+                "last_name",
+                "city",
+                "state",
+                "country",
+                "gender",
+                "year_of_birth",
+                "mobile_no",
+                "level_of_education",
+                "company",
+                "title",
+                "mailing_address",
+                "goals",
+                "company_name",
+                "ship_rank",
+                "honor_code",
+                "terms_of_service",
+            ]
+
+
+    II. Create following functions:
+        
+        def _add_company_name_field(self, form_desc, required=True):
+            """Add a Ship Name field to a form description.
+
+            Arguments:
+                form_desc: A form description
+
+            Keyword Arguments:
+                required (bool): Whether this field is required; defaults to True
+
+            """
+            # Translators: This label appears above a field on the registration form
+            # meant to get ship name.
+            company_name_label = _(u"Company Name")
+            company_name_placeholder = _(u"Enter Company Name")
+            form_desc.add_field(
+                "company_name",
+                label=company_name_label,
+                required=required,
+                placeholder=company_name_placeholder
+            )
+
+        def _add_ship_rank_field(self, form_desc, required=True):
+            """Add a rank field to a form description.
+
+            Arguments:
+                form_desc: A form description
+
+            Keyword Arguments:
+                required (bool): Whether this field is required; defaults to True
+
+            """
+            # Translators: This label appears above a field on the registration form
+            # meant to get rank.
+            ship_rank_label = _(u"Rank")
+
+            rank_list = ShipRank.objects.all()
+            RANK_CHOICES = []
+            RANK_CHOICES.append(('', '--'))
+
+            for rank in rank_list:
+                RANK_CHOICES.append((int(rank.id), ugettext_noop(str(rank.ship_rank))))
+            options = tuple(RANK_CHOICES)
+
+            form_desc.add_field(
+                "ship_rank",
+                label=ship_rank_label,
+                field_type="select",
+                options = options,
+                required=required
+            )
+
+
+4./common/djangoapps/student/forms.py
+
+
+        from ship_rank.models import ShipRank
+        import datetime
+
+        I . class AccountCreationForm(forms.Form):
+                ....
+                ....
+
+                error_message_dict = {
+                    "level_of_education": _("A level of education is required"),
+                    "gender": _("Your gender is required"),
+                    "year_of_birth": _("Your year of birth is required"),
+                    "mailing_address": _("Your mailing address is required"),
+                    "goals": _("A description of your goals is required"),
+                    "city": _("A city is required"),
+                    "country": _("A country is required"),
+                    "company_name":_("Company Name is required"),
+                    "ship_rank":_("Ship Rank is required"),
+                }
+
+                ....
+                ....
+                elif field_name == 'data_sharing_consent':
+                    if field_value == "required":
+                        self.fields[field_name] = TrueField(
+                            error_messages={
+                                "required": _(
+                                    "You must consent to data sharing to register."
+                                )
+                            }
+                        )
+                    elif field_value == 'optional':
+                        self.fields[field_name] = forms.BooleanField(
+                            required=False
+                        )
+                #Added by Mahendra
+                elif field_name == "ship_rank":
+                    self.fields[field_name] = forms.IntegerField(
+                        required=required,
+                        error_messages={
+                            "required": error_message,
+                        }
+                    )
+
+
+
+        II. Create following functions:
+            def clean_ship_rank(self):
+                """
+                Check ship_rank_id is exist or not
+                """
+                ship_rank_id = self.cleaned_data.get('ship_rank')
+
+                if ShipRank.objects.filter(id = ship_rank_id).exists():
+                    return int(ship_rank_id)
+                else:
+                    raise ValidationError(_("Rank key is invalid."))
+
+
+lms.env.json 
+=============
+"REGISTRATION_EXTRA_FIELDS":{
+    "ship_rank": "required"
+    "company_name": "optional"
+}

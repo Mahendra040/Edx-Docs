@@ -1,0 +1,35 @@
+from mailchimp3 import MailChimp
+client = MailChimp('mahendra.chaudhari@drcsystems.com', '23bad0435ccb627428290fcc3f26dcc7-us15')
+
+
+Create list in mailchimp
+=========================
+list = client.lists.create(data={"name":"Example","contact":{"company":"MailChimp","address1":"675 Ponce De Leon Ave NE","address2":"Suite 5000","city":"Atlanta","state":"GA","zip":"30308","country":"US","phone":""},"permission_reminder":"You'\''re receiving this email because you signed up for updates about Freddie'\''s newest hats.","campaign_defaults":{"from_name":"Example","from_email":"chaudhari@gmail.com","subject":"Welcome","language":"en"},"email_type_option":True})
+
+list_id = list['id']
+
+
+
+Create Member in list
+======================
+
+member = client.lists.members.create(list_id='cd673ef485', data={"email_address": "nikhil.patel@drcsystems.com", "status": "subscribed", "merge_fields":{"FNAME":"Nikhil","LNAME":"Patel"},"update_existing": True})
+
+
+Create Campaigns:
+=================
+
+Campaigns = client.campaigns.create(data={"recipients":{"list_id":"cd673ef485"},"type":"regular","settings":{"subject_line":"Your Purchase Receipt","reply_to":"dhruvil.amin@drcsystems.com","from_name":"Customer Service"}})
+
+
+aa = client.campaigns.update(campaign_id='04c2fe13e8',data={"recipients":{"list_id":"3c307a9f3f"}, "type":"regular", "settings":{"title":"Second Campaigns","subject_line":"This is an updated subject line", "reply_to":"mahendra.chaudhari@drcsystems.com", "from_name":"Customer Service","auto_footer":False}})
+
+HTML Content
+==============
+content = client.campaigns.content.update(campaign_id='04c2fe13e8', data={"html":"<span class='lert-title'> Alert: One or More Servers Innactive </span> "})
+
+
+Send Email:
+================
+
+client.campaigns.actions.send(campaign_id='04c2fe13e8')

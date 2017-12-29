@@ -1,0 +1,59 @@
+Qualtrics Survey
+
+Installations:
+
+1. Make sure you have the following items in your config file - cms.env.json
+
+	"ALLOW_ALL_ADVANCED_COMPONENTS": True
+	If it does not exist, insert it into the "FEATURES".
+
+2. Execute the commands
+
+	Switch to user "edxapp"
+		sudo -H -u edxapp bash
+
+	Change directory to "edxapp" home
+		cd ~
+
+	Loading the virtual environment of edxapp
+		source venvs/edxapp/bin/activate
+
+	Clone the XBlock to certain directory
+		git clone https://github.com/Stanford-Online/xblock-qualtrics-survey.git
+
+	Install
+		pip install -e ./xblock-qualtrics-survey
+		deactivate
+
+	Back to the user "edustack"
+		exit
+
+3. Restart the CMS platform
+	source /edx/bin/supervisorctl restart edxapp:
+
+
+Activate the XBlock in your course
+	Go to Settings -> Advanced Settings and set advanced_modules to ["qualtricssurvey"].
+
+Use the XBlock in a unit
+	Select Advanced -> Qualtrics Survey in your unit.
+
+
+Custom Settings ;
+
+	1. Click on Edit
+	2. Title (display name)  : Title to display
+	3. Survey ID: : This is the ID that Qualtrics uses for the survey, which can include numbers and letters, and should be entered in the following format: SV_###############
+
+		Create Account in https://www.qualtrics.com/login/
+		Create project and add Survey one or more 
+		Click on right-side user logo and select Account Settings 
+		Click on Qualtrics IDs which provide Survey ID
+		from Surveys block select your project Survey ID
+
+	4. Your University : This is the name of your university.
+	5. Link Text: This is the text that will link to your survey.
+	6. Param Name: This is the name for the User ID parameter in the url. If blank, User ID is ommitted from the url.
+
+		When you create Survey successfully click on Preview Survey button and you can see your live survey.
+		Copy that link from url and paste Param Name
